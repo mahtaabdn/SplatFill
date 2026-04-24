@@ -1,6 +1,6 @@
 # SplatFill
 
-This is the repository that contains source code for the [SplatFill website](https://mahtaabdn.github.io/SplatFill/).
+This is the repository that contains source code for the [SplatFill](https://mahtaabdn.github.io/SplatFill/).
 
 
 
