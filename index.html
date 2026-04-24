@@ -2,9 +2,8 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <meta name="description"
-         content="Project page for SplatFill: 3D Scene Inpainting via Depth-Guided Gaussian Splatting, accepted at ICPR 2026.">
-  <meta name="keywords" content="Splatfill, inpainting, gaussian">
+  <meta name="description" content="Project page for SplatFill: 3D Scene Inpainting via Depth-Guided Gaussian Splatting, accepted at ICPR 2026." />
+  <meta name="keywords" content="Splatfill, inpainting, 3dgs">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>SplatFill: 3D Scene Inpainting via Depth-Guided Gaussian Splatting</title>
 
@@ -42,29 +41,68 @@
 </head>
 <body>
 
+<nav class="navbar" role="navigation" aria-label="main navigation">
+  <div class="navbar-brand">
+    <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </a>
+  </div>
+  <div class="navbar-menu">
+    <div class="navbar-start" style="flex-grow: 1; justify-content: center;">
+      <a class="navbar-item" href="https://keunhong.com">
+      <span class="icon">
+          <i class="fas fa-home"></i>
+      </span>
+      </a>
+
+      <div class="navbar-item has-dropdown is-hoverable">
+        <a class="navbar-link">
+          More Research
+        </a>
+        <div class="navbar-dropdown">
+          <a class="navbar-item" href="https://hypernerf.github.io">
+            HyperNeRF
+          </a>
+          <a class="navbar-item" href="https://nerfies.github.io">
+            Nerfies
+          </a>
+          <a class="navbar-item" href="https://latentfusion.github.io">
+            LatentFusion
+          </a>
+          <a class="navbar-item" href="https://photoshape.github.io">
+            PhotoShape
+          </a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</nav>
+
 
 <section class="hero">
   <div class="hero-body">
     <div class="container is-max-desktop">
       <div class="columns is-centered">
         <div class="column has-text-centered">
-          <h1>SplatFill: 3D Scene Inpainting via Depth-Guided Gaussian Splatting</h1>
-          <p class="subtitle">
-            A 3D Gaussian Splatting framework for scene inpainting that combines depth-guided Gaussian placement,
-            selective multi-view refinement, and object-aware supervision for visually sharp and geometrically consistent results.
-          </p>
-          <div class="authors">
-            <span>Mahtab Dahaghin</span>
-            <span>·</span>
-            <span>Milind G. Padalkar</span>
-            <span>·</span>
-            <span>Matteo Toso</span>
-            <span>·</span>
-            <span>Alessio Del Bue</span>
-            <span>·</span>
-            <span>Vittorio Murino</span>
+          <h1 class="title is-1 publication-title">SplatFill: 3D Scene Inpainting via Depth-Guided Gaussian Splatting</h1>
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">
+              <a href="https://scholar.google.com/citations?user=FIA3fBcAAAAJ&hl=en&oi=ao">Mahtab Dahaghin</a><sup>1</sup>,</span>
+            <span class="author-block">
+              <a href="https://scholar.google.com/citations?hl=en&user=D2tVZk8AAAAJ">Milind G. Padalkar</a><sup>2</sup>,</span>
+            <span class="author-block">
+              <a href="https://scholar.google.com/citations?hl=en&user=xGqLC_MAAAAJ">Matteo Toso</a><sup>2</sup>,
+            </span>
+            <span class="author-block">
+              <a href="https://scholar.google.com/citations?hl=en&user=LUzvbGIAAAAJ">Alessio Del Bue</a><sup>2</sup>,
+            </span>
+            <span class="author-block">
+              <a href="https://scholar.google.com/citations?hl=en&user=yV3_PTkAAAAJ">Vittorio Murino</a><sup>2</sup>,
+            </span>
           </div>
-          <div class="affiliation">Pattern Analysis and Computer Vision (PAVIS), Istituto Italiano di Tecnologia (IIT), Genoa, Italy</div>
 
           <div class="is-size-5 publication-authors">
             <span class="author-block"><sup>1</sup>University of Washington,</span>
@@ -213,31 +251,16 @@
         <h2 class="title is-3">Abstract</h2>
         <div class="content has-text-justified">
           <p>
-            We present the first method capable of photorealistically reconstructing a non-rigidly
-            deforming scene using photos/videos captured casually from mobile phones.
-          </p>
-          <p>
-            Our approach augments neural radiance fields
-            (NeRF) by optimizing an
-            additional continuous volumetric deformation field that warps each observed point into a
-            canonical 5D NeRF.
-            We observe that these NeRF-like deformation fields are prone to local minima, and
-            propose a coarse-to-fine optimization method for coordinate-based models that allows for
-            more robust optimization.
-            By adapting principles from geometry processing and physical simulation to NeRF-like
-            models, we propose an elastic regularization of the deformation field that further
-            improves robustness.
-          </p>
-          <p>
-            We show that <span class="dnerf">Nerfies</span> can turn casually captured selfie
-            photos/videos into deformable NeRF
-            models that allow for photorealistic renderings of the subject from arbitrary
-            viewpoints, which we dub <i>"nerfies"</i>. We evaluate our method by collecting data
-            using a
-            rig with two mobile phones that take time-synchronized photos, yielding train/validation
-            images of the same pose at different viewpoints. We show that our method faithfully
-            reconstructs non-rigidly deforming scenes and reproduces unseen views with high
-            fidelity.
+            3D Gaussian Splatting (3DGS) has enabled realistic 3D scene representations from multi-view images.
+            However, inpainting missing regions, whether due to occlusion or scene editing, remains a challenging task,
+            often leading to blurry details, artifacts, and inconsistent geometry. We introduce SplatFill, a novel
+            approach for 3DGS scene inpainting that achieves state-of-the-art perceptual quality with 24.5% faster
+            training than existing methods. Our method combines scale-invariant depth supervision using soft depth
+            clustering and crop-focused refinement, a consistency-aware Selective Guided Inpainting (SGI) scheme that
+            iteratively identifies and corrects the most inconsistent regions, and object-aware supervision for better
+            semantic boundary preservation. Evaluations on the SPIn-NeRF dataset show that SplatFill surpasses prior
+            NeRF-based and 3DGS-based inpainting methods in visual fidelity while delivering sharper high-frequency
+            details and stronger geometric coherence across viewpoints.
           </p>
         </div>
       </div>
