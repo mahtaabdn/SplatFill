@@ -1,490 +1,438 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="description"
-        content="Deformable Neural Radiance Fields creates free-viewpoint portraits (nerfies) from casually captured videos.">
-  <meta name="keywords" content="Nerfies, D-NeRF, NeRF">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Nerfies: Deformable Neural Radiance Fields</title>
-
-  <!-- Global site tag (gtag.js) - Google Analytics -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-PYVRSFMDRL"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-
-    function gtag() {
-      dataLayer.push(arguments);
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SplatFill: 3D Scene Inpainting via Depth-Guided Gaussian Splatting</title>
+  <meta name="description" content="Project page for SplatFill: 3D Scene Inpainting via Depth-Guided Gaussian Splatting, accepted at ICPR 2026." />
+  <style>
+    :root {
+      --bg: #0b1020;
+      --card: #121936;
+      --card-2: #182145;
+      --text: #eef2ff;
+      --muted: #b8c0e0;
+      --line: #2b376f;
+      --accent: #7aa2ff;
+      --accent-2: #9d7cff;
+      --max: 1120px;
+      --shadow: 0 10px 30px rgba(0,0,0,0.25);
+      --radius: 18px;
     }
 
-    gtag('js', new Date());
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: linear-gradient(180deg, #0b1020 0%, #0d1430 100%);
+      color: var(--text);
+      line-height: 1.6;
+    }
 
-    gtag('config', 'G-PYVRSFMDRL');
-  </script>
+    a { color: inherit; text-decoration: none; }
 
-  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
-        rel="stylesheet">
+    .container {
+      width: min(var(--max), calc(100% - 2rem));
+      margin: 0 auto;
+    }
 
-  <link rel="stylesheet" href="./static/css/bulma.min.css">
-  <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
-  <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
-  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
-  <link rel="stylesheet"
-        href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
-  <link rel="stylesheet" href="./static/css/index.css">
-  <link rel="icon" href="./static/images/favicon.svg">
+    .hero {
+      padding: 64px 0 36px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      background:
+        radial-gradient(circle at 10% 10%, rgba(122,162,255,0.18), transparent 30%),
+        radial-gradient(circle at 90% 20%, rgba(157,124,255,0.16), transparent 28%),
+        linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0));
+    }
 
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-  <script defer src="./static/js/fontawesome.all.min.js"></script>
-  <script src="./static/js/bulma-carousel.min.js"></script>
-  <script src="./static/js/bulma-slider.min.js"></script>
-  <script src="./static/js/index.js"></script>
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border: 1px solid rgba(122,162,255,0.3);
+      background: rgba(122,162,255,0.12);
+      color: #d9e5ff;
+      border-radius: 999px;
+      font-size: 0.95rem;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      font-size: clamp(2rem, 4vw, 3.4rem);
+      line-height: 1.12;
+      margin: 0 0 16px;
+      letter-spacing: -0.03em;
+    }
+
+    .subtitle {
+      font-size: 1.1rem;
+      color: var(--muted);
+      max-width: 900px;
+      margin: 0 auto 20px;
+    }
+
+    .center { text-align: center; }
+
+    .authors {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px 14px;
+      margin: 18px 0 10px;
+      color: #ffffff;
+      font-weight: 600;
+    }
+
+    .affiliation {
+      color: var(--muted);
+      font-size: 1rem;
+      margin-bottom: 22px;
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 22px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 16px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: white;
+      font-weight: 700;
+      box-shadow: var(--shadow);
+    }
+
+    .btn.secondary {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: var(--text);
+      box-shadow: none;
+    }
+
+    section {
+      padding: 36px 0;
+    }
+
+    .section-title {
+      font-size: 1.6rem;
+      margin: 0 0 16px;
+      letter-spacing: -0.02em;
+    }
+
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: var(--radius);
+      padding: 22px;
+      box-shadow: var(--shadow);
+    }
+
+    .teaser {
+      display: grid;
+      gap: 18px;
+    }
+
+    .teaser img {
+      width: 100%;
+      border-radius: 16px;
+      display: block;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: #0a0f1f;
+    }
+
+    .caption {
+      color: var(--muted);
+      font-size: 0.96rem;
+      margin-top: 10px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .pill-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .pill {
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: #dfe6ff;
+      font-size: 0.95rem;
+    }
+
+    .method-card h3,
+    .video-card h3 {
+      margin: 0 0 8px;
+      font-size: 1.05rem;
+    }
+
+    .method-card p,
+    .video-card p,
+    .card p,
+    li {
+      color: var(--muted);
+      margin: 0;
+    }
+
+    .video-card video {
+      width: 100%;
+      border-radius: 14px;
+      background: #060912;
+      display: block;
+      margin-bottom: 12px;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    pre {
+      overflow-x: auto;
+      padding: 16px;
+      border-radius: 14px;
+      background: #091022;
+      border: 1px solid rgba(255,255,255,0.08);
+      color: #dbe5ff;
+      font-size: 0.93rem;
+    }
+
+    footer {
+      padding: 28px 0 48px;
+      color: var(--muted);
+      font-size: 0.95rem;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    @media (max-width: 900px) {
+      .grid-3, .grid-2 {
+        grid-template-columns: 1fr;
+      }
+
+      .hero {
+        padding-top: 42px;
+      }
+    }
+  </style>
 </head>
 <body>
+  <header class="hero">
+    <div class="container center">
+      <div class="badge">Accepted at ICPR 2026</div>
+      <h1>SplatFill: 3D Scene Inpainting via Depth-Guided Gaussian Splatting</h1>
+      <p class="subtitle">
+        A 3D Gaussian Splatting framework for scene inpainting that combines depth-guided Gaussian placement,
+        selective multi-view refinement, and object-aware supervision for visually sharp and geometrically consistent results.
+      </p>
 
-<nav class="navbar" role="navigation" aria-label="main navigation">
-  <div class="navbar-brand">
-    <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
-      <span aria-hidden="true"></span>
-      <span aria-hidden="true"></span>
-      <span aria-hidden="true"></span>
-    </a>
-  </div>
-  <div class="navbar-menu">
-    <div class="navbar-start" style="flex-grow: 1; justify-content: center;">
-      <a class="navbar-item" href="https://keunhong.com">
-      <span class="icon">
-          <i class="fas fa-home"></i>
-      </span>
-      </a>
+      <div class="authors">
+        <span>Mahtab Dahaghin</span>
+        <span>·</span>
+        <span>Milind G. Padalkar</span>
+        <span>·</span>
+        <span>Matteo Toso</span>
+        <span>·</span>
+        <span>Alessio Del Bue</span>
+        <span>·</span>
+        <span>Vittorio Murino</span>
+      </div>
+      <div class="affiliation">Pattern Analysis and Computer Vision (PAVIS), Istituto Italiano di Tecnologia (IIT), Genoa, Italy</div>
 
-      <div class="navbar-item has-dropdown is-hoverable">
-        <a class="navbar-link">
-          More Research
-        </a>
-        <div class="navbar-dropdown">
-          <a class="navbar-item" href="https://hypernerf.github.io">
-            HyperNeRF
-          </a>
-          <a class="navbar-item" href="https://nerfies.github.io">
-            Nerfies
-          </a>
-          <a class="navbar-item" href="https://latentfusion.github.io">
-            LatentFusion
-          </a>
-          <a class="navbar-item" href="https://photoshape.github.io">
-            PhotoShape
-          </a>
-        </div>
+      <div class="button-row">
+        <a class="btn" href="#results">Results Videos</a>
+        <a class="btn secondary" href="https://github.com/mahtaabdn/SplatFill" target="_blank" rel="noopener noreferrer">Code</a>
+        <a class="btn secondary" href="#citation">BibTeX</a>
+        <a class="btn secondary" href="#paper">Paper</a>
       </div>
     </div>
+  </header>
 
-  </div>
-</nav>
-
-
-<section class="hero">
-  <div class="hero-body">
-    <div class="container is-max-desktop">
-      <div class="columns is-centered">
-        <div class="column has-text-centered">
-          <h1 class="title is-1 publication-title">Nerfies: Deformable Neural Radiance Fields</h1>
-          <div class="is-size-5 publication-authors">
-            <span class="author-block">
-              <a href="https://keunhong.com">Keunhong Park</a><sup>1</sup>,</span>
-            <span class="author-block">
-              <a href="https://utkarshsinha.com">Utkarsh Sinha</a><sup>2</sup>,</span>
-            <span class="author-block">
-              <a href="https://jonbarron.info">Jonathan T. Barron</a><sup>2</sup>,
-            </span>
-            <span class="author-block">
-              <a href="http://sofienbouaziz.com">Sofien Bouaziz</a><sup>2</sup>,
-            </span>
-            <span class="author-block">
-              <a href="https://www.danbgoldman.com">Dan B Goldman</a><sup>2</sup>,
-            </span>
-            <span class="author-block">
-              <a href="https://homes.cs.washington.edu/~seitz/">Steven M. Seitz</a><sup>1,2</sup>,
-            </span>
-            <span class="author-block">
-              <a href="http://www.ricardomartinbrualla.com">Ricardo Martin-Brualla</a><sup>2</sup>
-            </span>
+  <main>
+    <section id="paper">
+      <div class="container">
+        <div class="card teaser">
+          <div>
+            <!-- Replace this path with your teaser image. -->
+            <img src="static/images/teaser.png" alt="SplatFill teaser image" />
           </div>
-
-          <div class="is-size-5 publication-authors">
-            <span class="author-block"><sup>1</sup>University of Washington,</span>
-            <span class="author-block"><sup>2</sup>Google Research</span>
-          </div>
-
-          <div class="column has-text-centered">
-            <div class="publication-links">
-              <!-- PDF Link. -->
-              <span class="link-block">
-                <a href="https://arxiv.org/pdf/2011.12948"
-                   class="external-link button is-normal is-rounded is-dark">
-                  <span class="icon">
-                      <i class="fas fa-file-pdf"></i>
-                  </span>
-                  <span>Paper</span>
-                </a>
-              </span>
-              <span class="link-block">
-                <a href="https://arxiv.org/abs/2011.12948"
-                   class="external-link button is-normal is-rounded is-dark">
-                  <span class="icon">
-                      <i class="ai ai-arxiv"></i>
-                  </span>
-                  <span>arXiv</span>
-                </a>
-              </span>
-              <!-- Video Link. -->
-              <span class="link-block">
-                <a href="https://www.youtube.com/watch?v=MrKrnHhk8IA"
-                   class="external-link button is-normal is-rounded is-dark">
-                  <span class="icon">
-                      <i class="fab fa-youtube"></i>
-                  </span>
-                  <span>Video</span>
-                </a>
-              </span>
-              <!-- Code Link. -->
-              <span class="link-block">
-                <a href="https://github.com/google/nerfies"
-                   class="external-link button is-normal is-rounded is-dark">
-                  <span class="icon">
-                      <i class="fab fa-github"></i>
-                  </span>
-                  <span>Code</span>
-                  </a>
-              </span>
-              <!-- Dataset Link. -->
-              <span class="link-block">
-                <a href="https://github.com/google/nerfies/releases/tag/0.1"
-                   class="external-link button is-normal is-rounded is-dark">
-                  <span class="icon">
-                      <i class="far fa-images"></i>
-                  </span>
-                  <span>Data</span>
-                  </a>
-            </div>
-
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="hero teaser">
-  <div class="container is-max-desktop">
-    <div class="hero-body">
-      <video id="teaser" autoplay muted loop playsinline height="100%">
-        <source src="./static/videos/teaser.mp4"
-                type="video/mp4">
-      </video>
-      <h2 class="subtitle has-text-centered">
-        <span class="dnerf">Nerfies</span> turns selfie videos from your phone into
-        free-viewpoint
-        portraits.
-      </h2>
-    </div>
-  </div>
-</section>
-
-
-<section class="hero is-light is-small">
-  <div class="hero-body">
-    <div class="container">
-      <div id="results-carousel" class="carousel results-carousel">
-        <div class="item item-steve">
-          <video poster="" id="steve" autoplay controls muted loop playsinline height="100%">
-            <source src="./static/videos/steve.mp4"
-                    type="video/mp4">
-          </video>
-        </div>
-        <div class="item item-chair-tp">
-          <video poster="" id="chair-tp" autoplay controls muted loop playsinline height="100%">
-            <source src="./static/videos/chair-tp.mp4"
-                    type="video/mp4">
-          </video>
-        </div>
-        <div class="item item-shiba">
-          <video poster="" id="shiba" autoplay controls muted loop playsinline height="100%">
-            <source src="./static/videos/shiba.mp4"
-                    type="video/mp4">
-          </video>
-        </div>
-        <div class="item item-fullbody">
-          <video poster="" id="fullbody" autoplay controls muted loop playsinline height="100%">
-            <source src="./static/videos/fullbody.mp4"
-                    type="video/mp4">
-          </video>
-        </div>
-        <div class="item item-blueshirt">
-          <video poster="" id="blueshirt" autoplay controls muted loop playsinline height="100%">
-            <source src="./static/videos/blueshirt.mp4"
-                    type="video/mp4">
-          </video>
-        </div>
-        <div class="item item-mask">
-          <video poster="" id="mask" autoplay controls muted loop playsinline height="100%">
-            <source src="./static/videos/mask.mp4"
-                    type="video/mp4">
-          </video>
-        </div>
-        <div class="item item-coffee">
-          <video poster="" id="coffee" autoplay controls muted loop playsinline height="100%">
-            <source src="./static/videos/coffee.mp4"
-                    type="video/mp4">
-          </video>
-        </div>
-        <div class="item item-toby">
-          <video poster="" id="toby" autoplay controls muted loop playsinline height="100%">
-            <source src="./static/videos/toby2.mp4"
-                    type="video/mp4">
-          </video>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-
-<section class="section">
-  <div class="container is-max-desktop">
-    <!-- Abstract. -->
-    <div class="columns is-centered has-text-centered">
-      <div class="column is-four-fifths">
-        <h2 class="title is-3">Abstract</h2>
-        <div class="content has-text-justified">
-          <p>
-            We present the first method capable of photorealistically reconstructing a non-rigidly
-            deforming scene using photos/videos captured casually from mobile phones.
-          </p>
-          <p>
-            Our approach augments neural radiance fields
-            (NeRF) by optimizing an
-            additional continuous volumetric deformation field that warps each observed point into a
-            canonical 5D NeRF.
-            We observe that these NeRF-like deformation fields are prone to local minima, and
-            propose a coarse-to-fine optimization method for coordinate-based models that allows for
-            more robust optimization.
-            By adapting principles from geometry processing and physical simulation to NeRF-like
-            models, we propose an elastic regularization of the deformation field that further
-            improves robustness.
-          </p>
-          <p>
-            We show that <span class="dnerf">Nerfies</span> can turn casually captured selfie
-            photos/videos into deformable NeRF
-            models that allow for photorealistic renderings of the subject from arbitrary
-            viewpoints, which we dub <i>"nerfies"</i>. We evaluate our method by collecting data
-            using a
-            rig with two mobile phones that take time-synchronized photos, yielding train/validation
-            images of the same pose at different viewpoints. We show that our method faithfully
-            reconstructs non-rigidly deforming scenes and reproduces unseen views with high
-            fidelity.
-          </p>
-        </div>
-      </div>
-    </div>
-    <!--/ Abstract. -->
-
-    <!-- Paper video. -->
-    <div class="columns is-centered has-text-centered">
-      <div class="column is-four-fifths">
-        <h2 class="title is-3">Video</h2>
-        <div class="publication-video">
-          <iframe src="https://www.youtube.com/embed/MrKrnHhk8IA?rel=0&amp;showinfo=0"
-                  frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-        </div>
-      </div>
-    </div>
-    <!--/ Paper video. -->
-  </div>
-</section>
-
-
-<section class="section">
-  <div class="container is-max-desktop">
-
-    <div class="columns is-centered">
-
-      <!-- Visual Effects. -->
-      <div class="column">
-        <div class="content">
-          <h2 class="title is-3">Visual Effects</h2>
-          <p>
-            Using <i>nerfies</i> you can create fun visual effects. This Dolly zoom effect
-            would be impossible without nerfies since it would require going through a wall.
-          </p>
-          <video id="dollyzoom" autoplay controls muted loop playsinline height="100%">
-            <source src="./static/videos/dollyzoom-stacked.mp4"
-                    type="video/mp4">
-          </video>
-        </div>
-      </div>
-      <!--/ Visual Effects. -->
-
-      <!-- Matting. -->
-      <div class="column">
-        <h2 class="title is-3">Matting</h2>
-        <div class="columns is-centered">
-          <div class="column content">
+          <div>
+            <h2 class="section-title">Overview</h2>
             <p>
-              As a byproduct of our method, we can also solve the matting problem by ignoring
-              samples that fall outside of a bounding box during rendering.
+              3D Gaussian Splatting (3DGS) enables realistic 3D scene representations from multi-view images, but
+              inpainting missing regions due to occlusion or scene editing often leads to blurry details, artifacts,
+              and inconsistent geometry. SplatFill addresses this by combining scale-invariant depth supervision,
+              Selective Guided Inpainting (SGI), and object-aware supervision within a 3DGS pipeline. On SPIn-NeRF,
+              the method achieves state-of-the-art perceptual quality while reducing training time by 24.5%.
             </p>
-            <video id="matting-video" controls playsinline height="100%">
-              <source src="./static/videos/matting.mp4"
-                      type="video/mp4">
-            </video>
-          </div>
-
-        </div>
-      </div>
-    </div>
-    <!--/ Matting. -->
-
-    <!-- Animation. -->
-    <div class="columns is-centered">
-      <div class="column is-full-width">
-        <h2 class="title is-3">Animation</h2>
-
-        <!-- Interpolating. -->
-        <h3 class="title is-4">Interpolating states</h3>
-        <div class="content has-text-justified">
-          <p>
-            We can also animate the scene by interpolating the deformation latent codes of two input
-            frames. Use the slider here to linearly interpolate between the left frame and the right
-            frame.
-          </p>
-        </div>
-        <div class="columns is-vcentered interpolation-panel">
-          <div class="column is-3 has-text-centered">
-            <img src="./static/images/interpolate_start.jpg"
-                 class="interpolation-image"
-                 alt="Interpolate start reference image."/>
-            <p>Start Frame</p>
-          </div>
-          <div class="column interpolation-video-column">
-            <div id="interpolation-image-wrapper">
-              Loading...
+            <div class="pill-list">
+              <span class="pill">3D Scene Inpainting</span>
+              <span class="pill">3D Gaussian Splatting</span>
+              <span class="pill">Novel View Synthesis</span>
+              <span class="pill">Depth-Guided Optimization</span>
             </div>
-            <input class="slider is-fullwidth is-large is-info"
-                   id="interpolation-slider"
-                   step="1" min="0" max="100" value="0" type="range">
-          </div>
-          <div class="column is-3 has-text-centered">
-            <img src="./static/images/interpolate_end.jpg"
-                 class="interpolation-image"
-                 alt="Interpolation end reference image."/>
-            <p class="is-bold">End Frame</p>
+            <p class="caption">
+              Put your teaser image at <code>static/images/teaser.png</code>. If your figure is somewhere else in the repo,
+              update the <code>src</code> path above.
+            </p>
           </div>
         </div>
-        <br/>
-        <!--/ Interpolating. -->
-
-        <!-- Re-rendering. -->
-        <h3 class="title is-4">Re-rendering the input video</h3>
-        <div class="content has-text-justified">
-          <p>
-            Using <span class="dnerf">Nerfies</span>, you can re-render a video from a novel
-            viewpoint such as a stabilized camera by playing back the training deformations.
-          </p>
-        </div>
-        <div class="content has-text-centered">
-          <video id="replay-video"
-                 controls
-                 muted
-                 preload
-                 playsinline
-                 width="75%">
-            <source src="./static/videos/replay.mp4"
-                    type="video/mp4">
-          </video>
-        </div>
-        <!--/ Re-rendering. -->
-
       </div>
-    </div>
-    <!--/ Animation. -->
+    </section>
 
-
-    <!-- Concurrent Work. -->
-    <div class="columns is-centered">
-      <div class="column is-full-width">
-        <h2 class="title is-3">Related Links</h2>
-
-        <div class="content has-text-justified">
+    <section id="abstract">
+      <div class="container">
+        <div class="card">
+          <h2 class="section-title">Abstract</h2>
           <p>
-            There's a lot of excellent work that was introduced around the same time as ours.
-          </p>
-          <p>
-            <a href="https://arxiv.org/abs/2104.09125">Progressive Encoding for Neural Optimization</a> introduces an idea similar to our windowed position encoding for coarse-to-fine optimization.
-          </p>
-          <p>
-            <a href="https://www.albertpumarola.com/research/D-NeRF/index.html">D-NeRF</a> and <a href="https://gvv.mpi-inf.mpg.de/projects/nonrigid_nerf/">NR-NeRF</a>
-            both use deformation fields to model non-rigid scenes.
-          </p>
-          <p>
-            Some works model videos with a NeRF by directly modulating the density, such as <a href="https://video-nerf.github.io/">Video-NeRF</a>, <a href="https://www.cs.cornell.edu/~zl548/NSFF/">NSFF</a>, and <a href="https://neural-3d-video.github.io/">DyNeRF</a>
-          </p>
-          <p>
-            There are probably many more by the time you are reading this. Check out <a href="https://dellaert.github.io/NeRF/">Frank Dellart's survey on recent NeRF papers</a>, and <a href="https://github.com/yenchenlin/awesome-NeRF">Yen-Chen Lin's curated list of NeRF papers</a>.
+            3D Gaussian Splatting (3DGS) has enabled realistic 3D scene representations from multi-view images.
+            However, inpainting missing regions, whether due to occlusion or scene editing, remains a challenging task,
+            often leading to blurry details, artifacts, and inconsistent geometry. We introduce SplatFill, a novel
+            approach for 3DGS scene inpainting that achieves state-of-the-art perceptual quality with 24.5% faster
+            training than existing methods. Our method combines scale-invariant depth supervision using soft depth
+            clustering and crop-focused refinement, a consistency-aware Selective Guided Inpainting (SGI) scheme that
+            iteratively identifies and corrects the most inconsistent regions, and object-aware supervision for better
+            semantic boundary preservation. Evaluations on the SPIn-NeRF dataset show that SplatFill surpasses prior
+            NeRF-based and 3DGS-based inpainting methods in visual fidelity while delivering sharper high-frequency
+            details and stronger geometric coherence across viewpoints.
           </p>
         </div>
       </div>
-    </div>
-    <!--/ Concurrent Work. -->
+    </section>
 
-  </div>
-</section>
-
-
-<section class="section" id="BibTeX">
-  <div class="container is-max-desktop content">
-    <h2 class="title">BibTeX</h2>
-    <pre><code>@article{park2021nerfies,
-  author    = {Park, Keunhong and Sinha, Utkarsh and Barron, Jonathan T. and Bouaziz, Sofien and Goldman, Dan B and Seitz, Steven M. and Martin-Brualla, Ricardo},
-  title     = {Nerfies: Deformable Neural Radiance Fields},
-  journal   = {ICCV},
-  year      = {2021},
-}</code></pre>
-  </div>
-</section>
-
-
-<footer class="footer">
-  <div class="container">
-    <div class="content has-text-centered">
-      <a class="icon-link"
-         href="./static/videos/nerfies_paper.pdf">
-        <i class="fas fa-file-pdf"></i>
-      </a>
-      <a class="icon-link" href="https://github.com/keunhong" class="external-link" disabled>
-        <i class="fab fa-github"></i>
-      </a>
-    </div>
-    <div class="columns is-centered">
-      <div class="column is-8">
-        <div class="content">
-          <p>
-            This website is licensed under a <a rel="license"
-                                                href="http://creativecommons.org/licenses/by-sa/4.0/">Creative
-            Commons Attribution-ShareAlike 4.0 International License</a>.
-          </p>
-          <p>
-            This means you are free to borrow the <a
-              href="https://github.com/nerfies/nerfies.github.io">source code</a> of this website,
-            we just ask that you link back to this page in the footer.
-            Please remember to remove the analytics code included in the header of the website which
-            you do not want on your website.
-          </p>
+    <section id="method">
+      <div class="container">
+        <h2 class="section-title">Method</h2>
+        <div class="grid-3">
+          <div class="card method-card">
+            <h3>Scale-Invariant Depth Supervision</h3>
+            <p>
+              Soft Depth Clustering Loss and Crop-Focused Depth Loss guide Gaussian placement without explicit scale-shift
+              alignment between monocular and rendered depth.
+            </p>
+          </div>
+          <div class="card method-card">
+            <h3>Selective Guided Inpainting (SGI)</h3>
+            <p>
+              Instead of re-inpainting every view, SGI localizes the most inconsistent regions and refines only those
+              regions, improving consistency while keeping the pipeline efficient.
+            </p>
+          </div>
+          <div class="card method-card">
+            <h3>Object-Aware Supervision</h3>
+            <p>
+              Instance-level features are embedded into Gaussians to better preserve semantic boundaries and support
+              object-aware scene editing.
+            </p>
+          </div>
         </div>
       </div>
-    </div>
-  </div>
-</footer>
+    </section>
 
+    <section id="results">
+      <div class="container">
+        <h2 class="section-title">Results Videos</h2>
+        <div class="grid-3">
+          <div class="card video-card">
+            <!-- Put your first result video at static/videos/result1.mp4 -->
+            <video controls playsinline muted loop>
+              <source src="static/videos/result1.mp4" type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+            <h3>Result 1</h3>
+            <p>Replace this caption with the scene name or a short explanation of what the video shows.</p>
+          </div>
+
+          <div class="card video-card">
+            <!-- Put your second result video at static/videos/result2.mp4 -->
+            <video controls playsinline muted loop>
+              <source src="static/videos/result2.mp4" type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+            <h3>Result 2</h3>
+            <p>Replace this caption with the scene name or a short explanation of what the video shows.</p>
+          </div>
+
+          <div class="card video-card">
+            <!-- Put your third result video at static/videos/result3.mp4 -->
+            <video controls playsinline muted loop>
+              <source src="static/videos/result3.mp4" type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+            <h3>Result 3</h3>
+            <p>Replace this caption with the scene name or a short explanation of what the video shows.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="highlights">
+      <div class="container">
+        <div class="grid-2">
+          <div class="card">
+            <h2 class="section-title">Highlights</h2>
+            <ul>
+              <li>Targets the trade-off between single-view detail and multi-view consistency in 3DGS inpainting.</li>
+              <li>Uses depth-guided optimization to improve 3D Gaussian placement and scene geometry.</li>
+              <li>Applies view-specific refinement only where depth inconsistency is highest.</li>
+              <li>Achieves stronger perceptual quality on SPIn-NeRF with improved efficiency.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h2 class="section-title">Project Assets</h2>
+            <p>Recommended repository structure:</p>
+            <pre>SplatFill/
+├── index.html
+└── static/
+    ├── images/
+    │   └── teaser.png
+    └── videos/
+        ├── result1.mp4
+        ├── result2.mp4
+        └── result3.mp4</pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="citation">
+      <div class="container">
+        <div class="card">
+          <h2 class="section-title">Citation</h2>
+          <pre>@inproceedings{dahaghin2026splatfill,
+  title     = {SplatFill: 3D Scene Inpainting via Depth-Guided Gaussian Splatting},
+  author    = {Dahaghin, Mahtab and Padalkar, Milind G. and Toso, Matteo and Del Bue, Alessio and Murino, Vittorio},
+  booktitle = {Proceedings of the International Conference on Pattern Recognition (ICPR)},
+  year      = {2026}
+}</pre>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      This page is adapted for your project content and can be used as the main GitHub Pages entry point for the SplatFill repository.
+      Update the paper link, teaser image, and video filenames before publishing.
+    </div>
+  </footer>
 </body>
 </html>
