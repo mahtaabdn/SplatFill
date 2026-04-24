@@ -148,18 +148,54 @@
 <section class="hero teaser">
   <div class="container is-max-desktop">
     <div class="hero-body">
-      <video id="teaser" autoplay muted loop playsinline height="100%">
-        <source src="./static/videos/teaser.mp4"
-                type="video/mp4">
-      </video>
+      <img src="./static/images/teaser.png" alt="SplatFill teaser image" />
       <h2 class="subtitle has-text-centered">
-        <span class="dnerf">Nerfies</span> turns selfie videos from your phone into
-        free-viewpoint
-        portraits.
+        <span class="dnerf">SplatFill</span> 3D inpainting method for filling the masked regions
       </h2>
     </div>
   </div>
 </section>
+
+
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <!-- Abstract. -->
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Abstract</h2>
+        <div class="content has-text-justified">
+          <p>
+            3D Gaussian Splatting (3DGS) has enabled realistic 3D scene representations from multi-view images.
+            However, inpainting missing regions, whether due to occlusion or scene editing, remains a challenging task,
+            often leading to blurry details, artifacts, and inconsistent geometry. We introduce SplatFill, a novel
+            approach for 3DGS scene inpainting that achieves state-of-the-art perceptual quality with 24.5% faster
+            training than existing methods. Our method combines scale-invariant depth supervision using soft depth
+            clustering and crop-focused refinement, a consistency-aware Selective Guided Inpainting (SGI) scheme that
+            iteratively identifies and corrects the most inconsistent regions, and object-aware supervision for better
+            semantic boundary preservation. Evaluations on the SPIn-NeRF dataset show that SplatFill surpasses prior
+            NeRF-based and 3DGS-based inpainting methods in visual fidelity while delivering sharper high-frequency
+            details and stronger geometric coherence across viewpoints.
+          </p>
+        </div>
+      </div>
+    </div>
+    <!--/ Abstract. -->
+
+    <!-- Paper video. -->
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Video</h2>
+        <div class="publication-video">
+          <iframe src="https://www.youtube.com/embed/MrKrnHhk8IA?rel=0&amp;showinfo=0"
+                  frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+        </div>
+      </div>
+    </div>
+    <!--/ Paper video. -->
+  </div>
+</section>
+
 
 
 <section class="hero is-light is-small">
@@ -216,45 +252,6 @@
         </div>
       </div>
     </div>
-  </div>
-</section>
-
-
-<section class="section">
-  <div class="container is-max-desktop">
-    <!-- Abstract. -->
-    <div class="columns is-centered has-text-centered">
-      <div class="column is-four-fifths">
-        <h2 class="title is-3">Abstract</h2>
-        <div class="content has-text-justified">
-          <p>
-            3D Gaussian Splatting (3DGS) has enabled realistic 3D scene representations from multi-view images.
-            However, inpainting missing regions, whether due to occlusion or scene editing, remains a challenging task,
-            often leading to blurry details, artifacts, and inconsistent geometry. We introduce SplatFill, a novel
-            approach for 3DGS scene inpainting that achieves state-of-the-art perceptual quality with 24.5% faster
-            training than existing methods. Our method combines scale-invariant depth supervision using soft depth
-            clustering and crop-focused refinement, a consistency-aware Selective Guided Inpainting (SGI) scheme that
-            iteratively identifies and corrects the most inconsistent regions, and object-aware supervision for better
-            semantic boundary preservation. Evaluations on the SPIn-NeRF dataset show that SplatFill surpasses prior
-            NeRF-based and 3DGS-based inpainting methods in visual fidelity while delivering sharper high-frequency
-            details and stronger geometric coherence across viewpoints.
-          </p>
-        </div>
-      </div>
-    </div>
-    <!--/ Abstract. -->
-
-    <!-- Paper video. -->
-    <div class="columns is-centered has-text-centered">
-      <div class="column is-four-fifths">
-        <h2 class="title is-3">Video</h2>
-        <div class="publication-video">
-          <iframe src="https://www.youtube.com/embed/MrKrnHhk8IA?rel=0&amp;showinfo=0"
-                  frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-        </div>
-      </div>
-    </div>
-    <!--/ Paper video. -->
   </div>
 </section>
 
